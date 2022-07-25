@@ -1,7 +1,9 @@
 use bevy::{prelude::*, DefaultPlugins, window::PresentMode};
 
 #[derive(Component)]
-struct MouseSquare;
+struct MouseSquare {
+    index: usize
+}
 
 fn main() {
     App::new()
@@ -22,11 +24,18 @@ fn main() {
 fn move_mouse(
     windows: Res<Windows>,
     camera_transform: Query<&Transform, (With<Camera>, Without<MouseSquare>)>,
-    mut mouse_square_transform: Query<&mut Transform, (With<MouseSquare>, Without<Camera>)>,
+    mut mouse_square_query: Query<(&mut Transform, &MouseSquare), Without<Camera>>,
 ) {
     let window = windows.get_primary().unwrap();
+    let mut mouse_squares = mouse_square_query.iter_mut().collect::<Vec<_>>();
+    mouse_squares.sort_by(|a, b| a.1.index.cmp(&b.1.index));
+
+    for i in 0..mouse_squares.len()-1 {
+        mouse_squares[i].0.translation = mouse_squares[i+1].0.translation;
+    }
+    
     if let Some(cursor_position) = window.cursor_position()  {
-        mouse_square_transform.single_mut().translation = window_to_world(
+        mouse_squares.last_mut().unwrap().0.translation = window_to_world(
             cursor_position, window, camera_transform.single(),
         );
     }
@@ -34,14 +43,17 @@ fn move_mouse(
 
 fn setup(mut commands: Commands) {
     commands.spawn_bundle(OrthographicCameraBundle::new_2d());
-    commands.spawn_bundle(SpriteBundle {
-        sprite: Sprite {
-            color: Color::rgb(0.25, 0.25, 0.75),
-            custom_size: Some(Vec2::new(16.0, 16.0)),
+    const NUM_SQUARES: usize = 20;
+    for i in 0..NUM_SQUARES {
+        commands.spawn_bundle(SpriteBundle {
+            sprite: Sprite {
+                color: Color::hsl(i as f32 / NUM_SQUARES as f32 * 360., 0.5, 0.5),
+                custom_size: Some(Vec2::new(16.0, 16.0)),
+                ..default()
+            },
             ..default()
-        },
-        ..default()
-    }).insert(MouseSquare);
+        }).insert(MouseSquare {index: i});
+    }
 }
 
 fn window_to_world(
