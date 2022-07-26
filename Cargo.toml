@@ -7,6 +7,7 @@ edition = "2021"
 
 [dependencies]
 bevy = "0.7.0"
+bevy_framepace = "0.4.0"
 
 # Enable a small amount of optimization in debug mode
 [profile.dev]
