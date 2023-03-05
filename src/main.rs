@@ -186,7 +186,7 @@ fn mouse_scroll_events(
     mut scroll_event: EventReader<MouseWheel>,
 ) {
     for ev in scroll_event.iter() {
-        particles.0 += if ev.y > 0.0 { 1 } else { -1 };
+        particles.0 = (particles.0 + if ev.y > 0.0 { 1 } else { -1 }).max(1);
     }
 }
 
