@@ -22,19 +22,22 @@ struct PositionedParticle {
 
 impl PositionedParticle {
     fn new(x: f32, y: f32, size: f32) -> Self {
-        let angle = rand::thread_rng().gen_range(0.0..2. * std::f32::consts::PI);
+        let mut rng = rand::thread_rng();
+        let angle = rng.gen_range(0.0..2. * std::f32::consts::PI);
         let dx = angle.sin() * 100.0;
         let dy = angle.cos() * 100.0;
+        let mut l = [0.75, 0.0, 0.0];
+        l.shuffle(&mut rng);
         Self {
             rigid_body: RigidBody::Dynamic,
             easing: Sprite {
-                color: Color::rgb(0.75, 0.75, 0.75),
+                color: Color::rgb(l[0], l[1], l[2]),
                 custom_size: Some(Vec2::new(size, size)),
                 ..default()
             }
             .ease_to(
                 Sprite {
-                    color: Color::rgb(0.9, 0.9, 1.2),
+                    color: Color::rgb(l[0] + 0.5, l[1] + 0.5, l[2] + 0.5),
                     custom_size: Some(Vec2::new(size * 1.2, size * 1.2)),
                     ..Default::default()
                 },
