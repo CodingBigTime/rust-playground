@@ -71,7 +71,10 @@ fn setup(mut particle_counter: ResMut<ParticleCount>, mut commands: Commands) {
             tonemapping: Tonemapping::TonyMcMapface,
             ..default()
         },
-        BloomSettings::default(),
+        BloomSettings {
+            low_frequency_boost: 0.5,
+            ..default()
+        },
     ));
     commands.spawn(PositionedParticle::new(0.0, 200.0, 32.0));
     particle_counter.0 += 1;
