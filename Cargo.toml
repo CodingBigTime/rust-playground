@@ -10,7 +10,7 @@ bevy = { version = "0.10", features = ["wayland"] }
 bevy_rapier2d = { version = "0.21", features = ["simd-stable"] }
 bevy_easings = "0.10.0"
 rand = "0.8.5"
-bevy-inspector-egui = "0.17.0"
+bevy-inspector-egui = "0.18.0"
 bevy_prototype_lyon = "0.8.0"
 interpolation = "0.2.0"
 

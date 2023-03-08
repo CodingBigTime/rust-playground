@@ -5,6 +5,7 @@ use bevy::input::mouse::*;
 use bevy::prelude::*;
 use bevy::window::{PrimaryWindow, WindowResolution};
 use bevy_easings::*;
+use bevy_inspector_egui::quick::WorldInspectorPlugin;
 use bevy_prototype_lyon::draw::Fill;
 use bevy_prototype_lyon::entity::ShapeBundle;
 use bevy_prototype_lyon::prelude::*;
@@ -167,6 +168,7 @@ fn main() {
         .add_plugin(RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(1000.0))
         .add_plugin(LogDiagnosticsPlugin::default())
         .add_plugin(FrameTimeDiagnosticsPlugin::default())
+        .add_plugin(WorldInspectorPlugin::default())
         // .add_plugin(RapierDebugRenderPlugin::default())
         // .add_system(show_particle_count)
         .add_system(mouse_button_events)
