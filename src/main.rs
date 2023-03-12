@@ -123,15 +123,39 @@ struct Material {
 }
 
 impl Material {
-    const ALUMINIUM: Material = Material { thermal_conductivity: 237.0, specific_heat_capacity: 0.9, density: 2.7, base_color: Color::rgb(0.8, 0.8, 0.9) };
-    const COPPER: Material = Material { thermal_conductivity: 385.0, specific_heat_capacity: 0.385, density: 8.96, base_color: Color::rgb(0.9, 0.6, 0.2) };
-    const IRON: Material = Material { thermal_conductivity: 80.0, specific_heat_capacity: 0.45, density: 7.87, base_color: Color::rgb(0.8, 0.8, 0.8) };
+    const ALUMINIUM: Material = Material {
+        thermal_conductivity: 237.0,
+        specific_heat_capacity: 0.9,
+        density: 2.7,
+        base_color: Color::rgb(0.8, 0.8, 0.9),
+    };
+    const COPPER: Material = Material {
+        thermal_conductivity: 385.0,
+        specific_heat_capacity: 0.385,
+        density: 8.96,
+        base_color: Color::rgb(0.9, 0.6, 0.2),
+    };
+    const IRON: Material = Material {
+        thermal_conductivity: 80.0,
+        specific_heat_capacity: 0.45,
+        density: 7.87,
+        base_color: Color::rgb(0.8, 0.8, 0.8),
+    };
 
-    fn new(thermal_conductivity: f32, specific_heat_capacity: f32, density: KiloGramPerMetreCubed, base_color: Color) -> Self {
-        Material { thermal_conductivity, specific_heat_capacity, density, base_color }
+    fn new(
+        thermal_conductivity: f32,
+        specific_heat_capacity: f32,
+        density: KiloGramPerMetreCubed,
+        base_color: Color,
+    ) -> Self {
+        Material {
+            thermal_conductivity,
+            specific_heat_capacity,
+            density,
+            base_color,
+        }
     }
 }
-
 
 #[derive(Component)]
 struct HeatBody {
@@ -153,9 +177,18 @@ impl HeatBody {
         Temperature::Kelvin(self.heat / self.heat_capacity())
     }
 
-    fn from_temperature_size_material(temperature: Temperature, size: CubicMetres, material: Material) -> Self {
-        let heat = temperature.as_kelvin_f32() * material.specific_heat_capacity * size * material.density;
-        Self { heat, size, material }
+    fn from_temperature_size_material(
+        temperature: Temperature,
+        size: CubicMetres,
+        material: Material,
+    ) -> Self {
+        let heat =
+            temperature.as_kelvin_f32() * material.specific_heat_capacity * size * material.density;
+        Self {
+            heat,
+            size,
+            material,
+        }
     }
 
     fn add_heat(&mut self, heat: Joules) {
@@ -167,8 +200,11 @@ impl HeatBody {
     }
 
     fn transfer_heat(&mut self, other: &mut Self, delta: Duration) {
-        let thermal_conductivity = (self.material.thermal_conductivity + other.material.thermal_conductivity) / 2.0;
-        let heat_transfer = thermal_conductivity * (self.temperature().as_kelvin_f32() - other.temperature().as_kelvin_f32()) * delta.as_secs_f32();
+        let thermal_conductivity =
+            (self.material.thermal_conductivity + other.material.thermal_conductivity) / 2.0;
+        let heat_transfer = thermal_conductivity
+            * (self.temperature().as_kelvin_f32() - other.temperature().as_kelvin_f32())
+            * delta.as_secs_f32();
         self.add_heat(-heat_transfer);
         other.add_heat(heat_transfer);
     }
@@ -201,9 +237,17 @@ impl PositionedParticle {
                     transform: Transform::from_xyz(x + dx * 0.2, y + dy * 0.2, 0.0),
                     ..default()
                 },
-                Fill::color(Color::rgb(multiplier * rgb.r as f32 / 255.0, multiplier * rgb.g as f32 / 255.0, multiplier * rgb.b as f32 / 255.0)),
+                Fill::color(Color::rgb(
+                    multiplier * rgb.r as f32 / 255.0,
+                    multiplier * rgb.g as f32 / 255.0,
+                    multiplier * rgb.b as f32 / 255.0,
+                )),
             ),
-            temperature: HeatBody::from_temperature_size_material(temperature, diameter * diameter * diameter * std::f32::consts::PI / 6.0, Material::COPPER),
+            temperature: HeatBody::from_temperature_size_material(
+                temperature,
+                diameter * diameter * diameter * std::f32::consts::PI / 6.0,
+                Material::COPPER,
+            ),
             event: ActiveEvents::COLLISION_EVENTS,
         }
     }
@@ -228,7 +272,12 @@ fn setup(mut particle_counter: ResMut<ParticleCount>, mut commands: Commands) {
             ..default()
         },
     ));
-    commands.spawn(PositionedParticle::new(0.0, 200.0, 32.0, Temperature::Kelvin(1000.0)));
+    commands.spawn(PositionedParticle::new(
+        0.0,
+        200.0,
+        32.0,
+        Temperature::Kelvin(1000.0),
+    ));
     particle_counter.0 += 1;
 
     /* Create the ground. */
@@ -278,7 +327,11 @@ fn mouse_button_events(
             commands.spawn(PositionedParticle::from_vector(
                 world_position,
                 thread_rng().gen_range(1..16) as f32,
-                if mouse_input.pressed(MouseButton::Left) { Temperature::Kelvin(thread_rng().gen_range(0.0..6000.0)) } else { Temperature::Kelvin(thread_rng().gen_range(10000.0..1000000.0)) },
+                if mouse_input.pressed(MouseButton::Left) {
+                    Temperature::Kelvin(thread_rng().gen_range(0.0..6000.0))
+                } else {
+                    Temperature::Kelvin(thread_rng().gen_range(10000.0..1000000.0))
+                },
             ));
             particle_counter.0 += 1;
         }
@@ -314,17 +367,36 @@ fn heat_transfer_event(
             let (mut heat_component_a, mut fill_a) = entity_a;
             let (mut heat_component_b, mut fill_b) = entity_b;
 
-            println!("Before: {} {}", heat_component_a.temperature(), heat_component_b.temperature());
-            heat_component_a.transfer_heat(&mut heat_component_b, Duration::from_secs_f32(1.0 / 144.0));
+            println!(
+                "Before: {} {}",
+                heat_component_a.temperature(),
+                heat_component_b.temperature()
+            );
+            heat_component_a
+                .transfer_heat(&mut heat_component_b, Duration::from_secs_f32(1.0 / 144.0));
 
-            let rgb_a = colortemp::temp_to_rgb(heat_component_a.temperature().as_kelvin_f32() as i64);
-            let rgb_b = colortemp::temp_to_rgb(heat_component_b.temperature().as_kelvin_f32() as i64);
+            let rgb_a =
+                colortemp::temp_to_rgb(heat_component_a.temperature().as_kelvin_f32() as i64);
+            let rgb_b =
+                colortemp::temp_to_rgb(heat_component_b.temperature().as_kelvin_f32() as i64);
             let multiplier_a = color_multiplier(heat_component_a.temperature().as_kelvin_f32());
             let multiplier_b = color_multiplier(heat_component_b.temperature().as_kelvin_f32());
-            fill_a.color = Color::rgb(multiplier_a * rgb_a.r as f32 / 255.0, multiplier_a * rgb_a.g as f32 / 255.0, multiplier_a * rgb_a.b as f32 / 255.0);
-            fill_b.color = Color::rgb(multiplier_b * rgb_b.r as f32 / 255.0, multiplier_b * rgb_b.g as f32 / 255.0, multiplier_b * rgb_b.b as f32 / 255.0);
+            fill_a.color = Color::rgb(
+                multiplier_a * rgb_a.r as f32 / 255.0,
+                multiplier_a * rgb_a.g as f32 / 255.0,
+                multiplier_a * rgb_a.b as f32 / 255.0,
+            );
+            fill_b.color = Color::rgb(
+                multiplier_b * rgb_b.r as f32 / 255.0,
+                multiplier_b * rgb_b.g as f32 / 255.0,
+                multiplier_b * rgb_b.b as f32 / 255.0,
+            );
 
-            println!("After: {} {}", heat_component_a.temperature(), heat_component_b.temperature());
+            println!(
+                "After: {} {}",
+                heat_component_a.temperature(),
+                heat_component_b.temperature()
+            );
         }
     }
 }
