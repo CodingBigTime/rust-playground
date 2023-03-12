@@ -1,19 +1,16 @@
 use std::time::Duration;
 
-use bevy::core_pipeline::bloom::BloomSettings;
-use bevy::core_pipeline::tonemapping::Tonemapping;
-use bevy::diagnostic::{FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin};
-use bevy::input::mouse::*;
-use bevy::prelude::*;
-use bevy::window::{PrimaryWindow, WindowResolution};
+use bevy::{
+    core_pipeline::{bloom::BloomSettings, tonemapping::Tonemapping},
+    diagnostic::{FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin},
+    input::mouse::*,
+    prelude::*,
+    window::{PrimaryWindow, WindowResolution},
+};
 use bevy_easings::*;
 use bevy_inspector_egui::quick::WorldInspectorPlugin;
-use bevy_prototype_lyon::draw::Fill;
-use bevy_prototype_lyon::entity::ShapeBundle;
-use bevy_prototype_lyon::prelude::*;
-use bevy_prototype_lyon::shapes::Circle;
-use bevy_rapier2d::plugin::*;
-use bevy_rapier2d::prelude::*;
+use bevy_prototype_lyon::{draw::Fill, entity::ShapeBundle, prelude::*, shapes::Circle};
+use bevy_rapier2d::{plugin::*, prelude::*};
 use rand::prelude::*;
 
 type Joules = f32;
