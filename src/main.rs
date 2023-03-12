@@ -102,6 +102,7 @@ impl Temperature {
     }
 }
 
+#[derive(Component, Reflect)]
 struct Material {
     thermal_conductivity: WattsPerMetreKelvin,
     specific_heat_capacity: JoulesPerKelvinPerKilogram,
@@ -144,7 +145,7 @@ impl Material {
     }
 }
 
-#[derive(Component)]
+#[derive(Component, Reflect)]
 struct HeatBody {
     heat: Joules,
     size: CubicMetres,
@@ -433,6 +434,7 @@ fn main() {
         .add_plugin(RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(1000.0))
         // .add_plugin(LogDiagnosticsPlugin::default())
         // .add_plugin(FrameTimeDiagnosticsPlugin::default())
+        .register_type::<HeatBody>()
         .add_plugin(WorldInspectorPlugin::default())
         // .add_plugin(RapierDebugRenderPlugin::default())
         // .add_system(show_particle_count)
