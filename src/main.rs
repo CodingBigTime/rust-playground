@@ -16,19 +16,6 @@ use bevy_rapier2d::plugin::*;
 use bevy_rapier2d::prelude::*;
 use rand::prelude::*;
 
-#[derive(Bundle)]
-struct PositionedParticle {
-    rigid_body: RigidBody,
-    collider: Collider,
-    restitution: Restitution,
-    velocity: Velocity,
-    temperature: HeatBody,
-    event: ActiveEvents,
-
-    #[bundle]
-    sprite: (ShapeBundle, Fill),
-}
-
 type Joules = f32;
 type JoulesPerKelvin = f32;
 type JoulesPerKelvinPerKilogram = f32;
@@ -210,6 +197,19 @@ impl HeatBody {
     }
 }
 
+#[derive(Bundle)]
+struct PositionedParticle {
+    rigid_body: RigidBody,
+    collider: Collider,
+    restitution: Restitution,
+    velocity: Velocity,
+    temperature: HeatBody,
+    event: ActiveEvents,
+
+    #[bundle]
+    sprite: (ShapeBundle, Fill),
+}
+
 impl PositionedParticle {
     fn new(x: f32, y: f32, diameter: f32, temperature: Temperature) -> Self {
         let mut rng = thread_rng();
@@ -252,6 +252,14 @@ impl PositionedParticle {
         }
     }
 
+    fn spawn(self, commands: &mut Commands) {
+        commands.spawn(self);
+    }
+
+    fn spawn_with_sleep_disabled(self, commands: &mut Commands) {
+        commands.spawn(self).insert(Sleeping::disabled());
+    }
+
     fn from_vector(position: Vec2, size: f32, temperature: Temperature) -> Self {
         Self::new(position.x, position.y, size, temperature)
     }
@@ -272,12 +280,8 @@ fn setup(mut particle_counter: ResMut<ParticleCount>, mut commands: Commands) {
             ..default()
         },
     ));
-    commands.spawn(PositionedParticle::new(
-        0.0,
-        200.0,
-        32.0,
-        Temperature::Kelvin(1000.0),
-    ));
+    PositionedParticle::new(0.0, 200.0, 32.0, Temperature::Kelvin(1000.0))
+        .spawn_with_sleep_disabled(&mut commands);
     particle_counter.0 += 1;
 
     /* Create the ground. */
@@ -324,7 +328,7 @@ fn mouse_button_events(
         .map(|ray| ray.origin.truncate())
     {
         for _ in 0..particles.0 {
-            commands.spawn(PositionedParticle::from_vector(
+            PositionedParticle::from_vector(
                 world_position,
                 thread_rng().gen_range(1..16) as f32,
                 if mouse_input.pressed(MouseButton::Left) {
@@ -332,7 +336,8 @@ fn mouse_button_events(
                 } else {
                     Temperature::Kelvin(thread_rng().gen_range(10000.0..1000000.0))
                 },
-            ));
+            )
+            .spawn_with_sleep_disabled(&mut commands);
             particle_counter.0 += 1;
         }
     }
