@@ -13,6 +13,7 @@ rand = "0.8.5"
 bevy-inspector-egui = "0.18.0"
 bevy_prototype_lyon = "0.8.0"
 interpolation = "0.2.0"
+colortemp = "0.1.0"
 
 # Enable max optimizations for dependencies, but not for our code:
 [profile.dev.package."*"]
