@@ -7,7 +7,7 @@ use bevy::{
     window::{PrimaryWindow, WindowResolution},
 };
 use bevy_easings::*;
-use bevy_inspector_egui::{prelude::ReflectInspectorOptions, quick::WorldInspectorPlugin};
+use bevy_inspector_egui::quick::WorldInspectorPlugin;
 use bevy_prototype_lyon::{draw::Fill, entity::ShapeBundle, prelude::*, shapes::Circle};
 use bevy_rapier2d::{plugin::*, prelude::*};
 use rand::prelude::*;
