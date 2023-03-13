@@ -2,13 +2,12 @@ use std::time::Duration;
 
 use bevy::{
     core_pipeline::{bloom::BloomSettings, tonemapping::Tonemapping},
-    diagnostic::{FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin},
     input::mouse::*,
     prelude::*,
     window::{PrimaryWindow, WindowResolution},
 };
 use bevy_easings::*;
-use bevy_inspector_egui::quick::WorldInspectorPlugin;
+use bevy_inspector_egui::{prelude::ReflectInspectorOptions, quick::WorldInspectorPlugin};
 use bevy_prototype_lyon::{draw::Fill, entity::ShapeBundle, prelude::*, shapes::Circle};
 use bevy_rapier2d::{plugin::*, prelude::*};
 use rand::prelude::*;
@@ -350,12 +349,9 @@ fn mouse_scroll_events(
     }
 }
 
-#[derive(Resource)]
+#[derive(Resource, Reflect, Default)]
+#[reflect(Resource)]
 struct ParticleCount(u32);
-
-fn show_particle_count(particles: Res<ParticleCount>) {
-    println!("Particle count: {}", particles.0);
-}
 
 fn heat_transfer_event(
     mut collision_events: EventReader<CollisionEvent>,
@@ -411,13 +407,41 @@ fn color_multiplier(temperature: f32) -> f32 {
     }
 }
 
+#[derive(Resource, Reflect, Default)]
+#[reflect(Resource)]
+struct PerformanceInfo {
+    current_fps: f64,
+    average_fps_10_frames: f64,
+    average_fps_60_frames: f64,
+    current_frame_time: Duration,
+    average_frame_time_10_frames: Duration,
+    average_frame_time_60_frames: Duration,
+}
+
+fn update_performance_info(time: Res<Time>, mut performance_info: ResMut<PerformanceInfo>) {
+    // Update the performance info using Bevy's Time resource
+    let current = time.delta();
+    let average_10_frames = (performance_info.average_frame_time_10_frames * 9 + current) / 10;
+    let average_60_frames = (performance_info.average_frame_time_60_frames * 59 + current) / 60;
+    let fps = 1.0 / current.as_secs_f64();
+    let fps_10_frames = 1.0 / average_10_frames.as_secs_f64();
+    let fps_60_frames = 1.0 / average_60_frames.as_secs_f64();
+
+    performance_info.current_frame_time = current;
+    performance_info.average_frame_time_10_frames = average_10_frames;
+    performance_info.average_frame_time_60_frames = average_60_frames;
+    performance_info.current_fps = fps;
+    performance_info.average_fps_10_frames = fps_10_frames;
+    performance_info.average_fps_60_frames = fps_60_frames;
+}
 fn main() {
     App::new()
         .add_startup_system(setup)
         .insert_resource(ClearColor(Color::hex("161616").unwrap()))
-        .insert_resource(ParticleCount(0))
+        .insert_resource(ParticleCount::default())
         .insert_resource(Particles(1))
         .insert_resource(Msaa::Sample4)
+        .insert_resource(PerformanceInfo::default())
         .add_plugins(DefaultPlugins.set(WindowPlugin {
             primary_window: Some(Window {
                 transparent: false,
@@ -431,10 +455,13 @@ fn main() {
         .add_plugin(RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(1000.0))
         // .add_plugin(LogDiagnosticsPlugin::default())
         // .add_plugin(FrameTimeDiagnosticsPlugin::default())
+        .register_type::<PerformanceInfo>()
         .register_type::<HeatBody>()
+        .register_type::<ParticleCount>()
         .add_plugin(WorldInspectorPlugin::default())
         // .add_plugin(RapierDebugRenderPlugin::default())
         // .add_system(show_particle_count)
+        .add_system(update_performance_info)
         .add_system(mouse_button_events)
         .add_system(mouse_scroll_events)
         .add_system(heat_transfer_event)
