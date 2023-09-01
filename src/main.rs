@@ -16,9 +16,9 @@ use rand::prelude::*;
 use uom::{
     si,
     si::{
-        area, energy, heat_capacity, length, mass, mass_density, specific_heat_capacity,
-        temperature_interval, thermal_conductance, thermal_conductivity, thermodynamic_temperature,
-        time, volume,
+        area, energy, length, mass_density, specific_heat_capacity,
+        temperature_interval, thermal_conductivity, thermodynamic_temperature,
+        time,
     },
 };
 
@@ -179,7 +179,6 @@ struct PositionedParticle {
     temperature: HeatBody,
     event: ActiveEvents,
 
-    #[bundle]
     sprite: (ShapeBundle, Fill),
 }
 
@@ -270,7 +269,7 @@ fn setup(mut particle_counter: ResMut<ParticleCount>, mut commands: Commands) {
         si::f64::Length::new::<length::millimeter>(32.0),
         si::f64::ThermodynamicTemperature::new::<thermodynamic_temperature::kelvin>(1000.0),
     )
-    .spawn_with_sleep_disabled(&mut commands);
+        .spawn_with_sleep_disabled(&mut commands);
     particle_counter.0 += 1;
 
     /* Create the ground. */
@@ -330,7 +329,7 @@ fn mouse_button_events(
                     )
                 },
             )
-            .spawn_with_sleep_disabled(&mut commands);
+                .spawn_with_sleep_disabled(&mut commands);
             particle_counter.0 += 1;
         }
     }
@@ -456,9 +455,10 @@ fn update_performance_info(time: Res<Time>, mut performance_info: ResMut<Perform
     performance_info.average_fps_10_frames = fps_10_frames;
     performance_info.average_fps_60_frames = fps_60_frames;
 }
+
 fn main() {
     App::new()
-        .add_startup_system(setup)
+        .add_systems(Startup, setup)
         .insert_resource(ClearColor(Color::hex("161616").unwrap()))
         .insert_resource(ParticleCount::default())
         .insert_resource(Particles(1))
@@ -472,20 +472,20 @@ fn main() {
             }),
             ..default()
         }))
-        .add_plugin(ShapePlugin)
-        .add_plugin(EasingsPlugin)
-        .add_plugin(RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(1000.0))
+        .add_plugins(ShapePlugin)
+        .add_plugins(EasingsPlugin)
+        .add_plugins(RapierPhysicsPlugin::<NoUserData>::pixels_per_meter(1000.0))
         // .add_plugin(LogDiagnosticsPlugin::default())
         // .add_plugin(FrameTimeDiagnosticsPlugin::default())
         .register_type::<PerformanceInfo>()
         .register_type::<HeatBody>()
         .register_type::<ParticleCount>()
-        .add_plugin(WorldInspectorPlugin::default())
+        .add_plugins(WorldInspectorPlugin::default())
         // .add_plugin(RapierDebugRenderPlugin::default())
         // .add_system(show_particle_count)
-        .add_system(update_performance_info)
-        .add_system(mouse_button_events)
-        .add_system(mouse_scroll_events)
-        .add_system(heat_transfer_event)
+        .add_systems(Update, update_performance_info)
+        .add_systems(Update, mouse_button_events)
+        .add_systems(Update, mouse_scroll_events)
+        .add_systems(Update, heat_transfer_event)
         .run();
 }
